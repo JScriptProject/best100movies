@@ -1,125 +1,88 @@
-import { client } from "@/app/sanity";
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Calendar, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { getMovie } from "@/lib/getMovie";
 import StarRating from "@/components/StarRating";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import SearchInput from "@/components/SearchInput";
 
-// Fetch logic specifically for a single movie
-async function getMovieDetail(slug: string) {
-  const query = `*[_type == "movie" && slug.current == '${slug}'][0] {
-    _id,
-    title,
-    overview,
-    releaseDate,
-    rating,
-    "poster": poster.asset->url
-  }`;
-
-  const data = await client.fetch(query);
-  return data;
+// 1. FIX: Define Props for Next.js 15 (It MUST be a Promise)
+interface HomeProps {
+  searchParams: Promise<{ query?: string }>;
 }
 
-export default async function MovieDetail({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-  const movie = await getMovieDetail(slug);
+export default async function Home({ searchParams }: HomeProps) {
+  // 2. FIX: You MUST await the searchParams in Next.js 15
+  const resolvedParams = await searchParams;
+  const query = resolvedParams?.query || "";
 
-  if (!movie) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <h1 className="text-2xl font-bold">Movie not found</h1>
-        <Link href="/">
-          <Button className="mt-4">Go Home</Button>
-        </Link>
-      </div>
-    );
-  }
+  const data = await getMovie(query);
+  console.log("The movie data=>", data);
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* HERO SECTION WITH BLURRED BACKDROP */}
-      <div className="relative w-full h-[70vh] overflow-hidden">
-        {/* The Background Layer */}
-        <div className="absolute inset-0">
-          <Image
-            src={movie.poster}
-            alt={movie.title}
-            fill
-            className="object-cover blur-xl opacity-50 scale-110" // Blurs and scales up
-            priority
-          />
-          {/* The Dark Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-        </div>
+    <main className="container mx-auto px-4 pb-10">
+      <h1 className="text-center mt-16 text-4xl font-bold mb-5">
+        Latest Released Movies
+      </h1>
 
-        {/* The Content Layer */}
-        <div className="relative z-10 container mx-auto px-4 h-full flex flex-col md:flex-row items-end pb-12 gap-8">
-          {/* Floating Poster */}
-          <div className="hidden md:block shrink-0 w-[250px] rounded-lg overflow-hidden shadow-2xl border-4 border-white/10 transform translate-y-16">
-            <Image
-              src={movie.poster}
-              alt={movie.title}
-              width={250}
-              height={375}
-              className="object-cover"
-            />
-          </div>
+      <SearchInput />
 
-          {/* Movie Info */}
-          <div className="flex flex-col gap-4 mb-4">
-            {/* Back Button */}
-            <Link
-              href="/"
-              className="absolute top-8 left-4 md:left-0 flex items-center gap-2 text-white/80 hover:text-white transition-colors bg-black/30 px-4 py-2 rounded-full backdrop-blur-sm"
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {data && data.length > 0 ? (
+          data.map((movie: any) => (
+            <Card
+              key={movie._id}
+              className="overflow-hidden hover:shadow-lg transition-shadow duration-300"
             >
-              <ArrowLeft className="w-4 h-4" /> Back to Home
-            </Link>
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="text-lg line-clamp-1">
+                  {movie.title}
+                </CardTitle>
+                <CardDescription className="line-clamp-2 text-xs">
+                  {movie.overview}
+                </CardDescription>
+              </CardHeader>
 
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
-              {movie.title}
-            </h1>
+              <CardContent className="p-0">
+                <div className="relative aspect-[2/3] w-full overflow-hidden bg-gray-100">
+                  <img
+                    src={movie.poster}
+                    alt={movie.title}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                  />
+                </div>
+              </CardContent>
 
-            <div className="flex items-center gap-4 text-sm md:text-base text-gray-300">
-              <div className="flex items-center gap-1 bg-yellow-500/20 px-3 py-1 rounded-full text-yellow-400 border border-yellow-500/30">
-                <Star className="w-4 h-4 fill-yellow-400" />
-                <span className="font-bold">{movie.rating.toFixed(1)}</span>
-              </div>
-              <div className="flex items-center gap-1 bg-white/10 px-3 py-1 rounded-full">
-                <Calendar className="w-4 h-4" />
-                <span>{movie.releaseDate}</span>
-              </div>
-            </div>
+              <CardFooter className="p-4 flex flex-col gap-3 items-start">
+                <StarRating rating={movie.rating} />
+
+                <div className="flex w-full justify-between items-center mt-1">
+                  {/* 3. FIX: Format the Date string to avoid "Date" type errors */}
+                  <span className="text-xs text-gray-400 font-medium">
+                    {movie.releaseDate
+                      ? new Date(movie.releaseDate).toLocaleDateString()
+                      : "N/A"}
+                  </span>
+
+                  <Link href={`/movie/${movie.slug}`}>
+                    <Button size="sm">View Details</Button>
+                  </Link>
+                </div>
+              </CardFooter>
+            </Card>
+          ))
+        ) : (
+          <div className="col-span-full text-center py-20 text-gray-500">
+            No movies found matching "{query}"
           </div>
-        </div>
+        )}
       </div>
-
-      {/* OVERVIEW SECTION */}
-      <div className="container mx-auto px-4 py-16 grid md:grid-cols-[250px_1fr] gap-8">
-        {/* Empty column to align with poster above */}
-        <div className="hidden md:block"></div>
-
-        <div className="space-y-6">
-          <h2 className="text-2xl font-semibold border-l-4 border-red-600 pl-4">
-            Storyline
-          </h2>
-          <p className="text-lg text-gray-300 leading-relaxed max-w-3xl">
-            {movie.overview}
-          </p>
-
-          <div className="pt-8">
-            <Button
-              size="lg"
-              className="bg-red-600 hover:bg-red-700 text-white px-8"
-            >
-              Watch Trailer
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
+    </main>
   );
 }
