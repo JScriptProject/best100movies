@@ -21,7 +21,8 @@ export async function getMovie(query?: string) {
   releaseDate, 
   "poster": poster.asset->url,
   "slug":slug.current,
-  rating
+  rating, 
+  genres,
   }`
     : `*[_type == "movie"]{ 
   _id, 
@@ -30,7 +31,8 @@ export async function getMovie(query?: string) {
   releaseDate, 
   "poster": poster.asset->url,
   "slug":slug.current,
-  rating
+  rating,
+  genres
   }`;
   const response = await client.fetch<Movie[]>(queryString, {
     search: query ? query : null,
@@ -49,7 +51,8 @@ export async function getMovieBySlug(selectedSlug: string) {
     overview,
     releaseDate,
     "poster": poster.asset->url,
-    rating
+    rating,
+    genres
     }`;
 
   const response = await client.fetch<Movie>(query, { slug: selectedSlug });

@@ -1,86 +1,89 @@
 import Link from "next/link";
 import { getMovie } from "@/lib/getMovie";
-import StarRating from "@/components/StarRating";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { MovieCarousel } from "@/components/MovieCarousel"; // Import the new carousel
 import SearchInput from "@/components/SearchInput";
+import { Button } from "@/components/ui/button";
 
-// 1. FIX: Define Props for Next.js 15 (Must be a Promise)
 interface HomeProps {
   searchParams: Promise<{ query?: string }>;
 }
 
 export default async function Home({ searchParams }: HomeProps) {
-  // 2. FIX: You MUST await the searchParams
   const resolvedParams = await searchParams;
   const query = resolvedParams?.query || "";
 
+  // Fetch data
   const data = await getMovie(query);
-  console.log("The movie data=>", data);
+
+  // LOGIC: If searching, show grid. If home, show Carousel + "Must Watch" Sections
+  const isSearching = query.length > 0;
 
   return (
-    <main className="container mx-auto px-4 pb-10">
-      <h1 className="text-center mt-16 text-4xl font-bold mb-5">
-        Latest Released Movies
-      </h1>
+    <main className="container mx-auto px-4 pb-20 space-y-12">
+      {/* 1. HERO HEADER (Centered) */}
+      {!isSearching && (
+        <div className="text-center mt-16 mb-8 space-y-4">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white">
+            Best <span className="text-red-600">100</span> Movies
+          </h1>
+          <p className="text-gray-400 max-w-2xl mx-auto text-lg">
+            Curated lists of the absolute best films from TMDB. Updated daily
+            for the true cinema lover.
+          </p>
+          <div className="max-w-md mx-auto mt-6">
+            <SearchInput />
+          </div>
+        </div>
+      )}
 
-      <SearchInput />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {data && data.length > 0 ? (
-          data.map((movie: any) => (
-            <Card
-              key={movie._id}
-              className="overflow-hidden hover:shadow-lg transition-shadow duration-300"
-            >
-              <CardHeader className="p-4 pb-2">
-                <CardTitle className="text-lg line-clamp-1">
-                  {movie.title}
-                </CardTitle>
-                <CardDescription className="line-clamp-2 text-xs">
-                  {movie.overview}
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent className="p-0">
-                <div className="relative aspect-[2/3] w-full overflow-hidden bg-gray-100">
+      {/* If Searching: Show Simple Grid */}
+      {isSearching ? (
+        <div className="mt-8">
+          <h2 className="text-xl mb-4 text-gray-400">
+            Search Results for "{query}"
+          </h2>
+          {/* ... Your Existing Grid Code Here ... */}
+          {/* (Keep your existing grid mapping logic here for search results) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            {data.map((movie: any) => (
+              <Link key={movie._id} href={`/movie/${movie.slug}`}>
+                <div className="relative aspect-[2/3] bg-gray-800 rounded-lg overflow-hidden hover:scale-105 transition-transform">
                   <img
                     src={movie.poster}
-                    alt={movie.title}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                    className="object-cover w-full h-full"
                   />
                 </div>
-              </CardContent>
-
-              <CardFooter className="p-4 flex flex-col gap-3 items-start">
-                <StarRating rating={movie.rating} />
-
-                <div className="flex w-full justify-between items-center mt-1">
-                  <span className="text-xs text-gray-400 font-medium">
-                    {/* Safe date rendering */}
-                    {movie.releaseDate ? String(movie.releaseDate) : "N/A"}
-                  </span>
-
-                  <Link href={`/movie/${movie.slug}`}>
-                    <Button size="sm">View Details</Button>
-                  </Link>
-                </div>
-              </CardFooter>
-            </Card>
-          ))
-        ) : (
-          <div className="col-span-full text-center py-20 text-gray-500">
-            No movies found matching "{query}"
+              </Link>
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        /* 2. HOME LAYOUT (Carousels) */
+        <div className="space-y-16">
+          {/* Top 20 Carousel */}
+          <MovieCarousel
+            title="Top 20 Trending Now"
+            movies={data.slice(0, 20)}
+            viewAllLink="/trending"
+          />
+
+          {/* January Picks (Just using next 10 for demo) */}
+          <MovieCarousel
+            title="Must Watch in January 2026"
+            movies={data.slice(20, 30)}
+            viewAllLink="/picks/january"
+          />
+
+          {/* Action Movies (Filtering by Genre in Frontend for now) */}
+          <MovieCarousel
+            title="Best Action Movies"
+            movies={data
+              .filter((m: any) => m.genres?.includes("Action"))
+              .slice(0, 15)}
+            viewAllLink="/genre/action"
+          />
+        </div>
+      )}
     </main>
   );
 }
