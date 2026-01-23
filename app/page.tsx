@@ -11,7 +11,8 @@ interface HomeProps {
 export default async function Home({ searchParams }: HomeProps) {
   const resolvedParams = await searchParams;
   const query = resolvedParams?.query || "";
-
+  console.log("Query: ", query);
+  console.log("resolbed Params=>", resolvedParams);
   // Fetch data
   const data = await getMovie(query);
 
@@ -21,7 +22,7 @@ export default async function Home({ searchParams }: HomeProps) {
   return (
     <main className="container mx-auto px-4 pb-20 space-y-12">
       {/* 1. HERO HEADER (Centered) */}
-      {!isSearching && (
+      
         <div className="text-center mt-16 mb-8 space-y-4">
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white">
             Best <span className="text-red-600">100</span> Movies
@@ -34,29 +35,30 @@ export default async function Home({ searchParams }: HomeProps) {
             <SearchInput />
           </div>
         </div>
-      )}
 
       {/* If Searching: Show Simple Grid */}
       {isSearching ? (
-        <div className="mt-8">
-          <h2 className="text-xl mb-4 text-gray-400">
-            Search Results for "{query}"
-          </h2>
-          {/* ... Your Existing Grid Code Here ... */}
-          {/* (Keep your existing grid mapping logic here for search results) */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {data.map((movie: any) => (
-              <Link key={movie._id} href={`/movie/${movie.slug}`}>
-                <div className="relative aspect-[2/3] bg-gray-800 rounded-lg overflow-hidden hover:scale-105 transition-transform">
-                  <img
-                    src={movie.poster}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-              </Link>
-            ))}
+        
+          <div className="mt-8">
+            <h2 className="text-xl mb-4 text-gray-400">
+              Search Results for "{query}"
+            </h2>
+            {/* ... Your Existing Grid Code Here ... */}
+            {/* (Keep your existing grid mapping logic here for search results) */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              {data.map((movie: any) => (
+                <Link key={movie._id} href={`/movie/${movie.slug}`}>
+                  <div className="relative aspect-[2/3] bg-gray-800 rounded-lg overflow-hidden hover:scale-105 transition-transform">
+                    <img
+                      src={movie.poster}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
+        
       ) : (
         /* 2. HOME LAYOUT (Carousels) */
         <div className="space-y-16">

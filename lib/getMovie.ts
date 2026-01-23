@@ -1,50 +1,58 @@
 import { client } from "@/app/sanity";
-
-//typescript
+import { cache } from "react";
 
 interface Movie {
   title: string;
   poster: string;
   overview: string;
   _id: string;
-  releaseDate: Date;
+  releaseDate: string;
   rating: number;
   slug: string;
+  genres?: string[];
+  trailer?: string;
+  runtime?: number;
+  cast?: {
+    actorName: string;
+    photoUrl: string;
+  }[];
 }
 
-export async function getMovie(query?: string) {
+// 1. GET ALL MOVIES (Cached + ISR)
+export const getMovie = cache(async (query?: string) => {
   const queryString = query
-    ? `*[_type == "movie" && title match $search + "*"]{
-  _id, 
-  title, 
-  overview, 
-  releaseDate, 
-  "poster": poster.asset->url,
-  "slug":slug.current,
-  rating, 
-  genres,
-  }`
-    : `*[_type == "movie"]{ 
-  _id, 
-  title, 
-  overview, 
-  releaseDate, 
-  "poster": poster.asset->url,
-  "slug":slug.current,
-  rating,
-  genres
-  }`;
-  const response = await client.fetch<Movie[]>(queryString, {
-    search: query ? query : null,
-  });
+    ? `*[_type == "movie" && title match $search + "*"] | order(releaseDate desc) {
+        _id, 
+        title, 
+        overview, 
+        releaseDate, 
+        "poster": poster.asset->url,
+        "slug": slug.current,
+        rating, 
+        genres
+      }`
+    : `*[_type == "movie"] | order(releaseDate desc) { 
+        _id, 
+        title, 
+        overview, 
+        releaseDate, 
+        "poster": poster.asset->url,
+        "slug": slug.current,
+        rating,
+        genres
+      }`;
+
+  const response = await client.fetch<Movie[]>(
+    queryString,
+    { search: query ? query : null },
+    { next: { revalidate: 3600 } },
+  );
+
   return response;
-}
+});
 
-///////////////////////////
-// GET MOVIE INFORMATION BY SLUG TO SHOW MOVIE
-///////////////////////////
-
-export async function getMovieBySlug(selectedSlug: string) {
+// 2. GET SINGLE MOVIE (Fetches Full Details)
+export const getMovieBySlug = cache(async (selectedSlug: string) => {
   const query = `*[_type == "movie" && slug.current == $slug][0]{
     _id,
     title,
@@ -52,9 +60,20 @@ export async function getMovieBySlug(selectedSlug: string) {
     releaseDate,
     "poster": poster.asset->url,
     rating,
-    genres
-    }`;
+    genres,
+    trailer,
+    runtime,
+    cast[]{
+      actorName,
+      "photoUrl": photo.asset->url
+    }
+  }`;
 
-  const response = await client.fetch<Movie>(query, { slug: selectedSlug });
+  const response = await client.fetch<Movie>(
+    query,
+    { slug: selectedSlug },
+    { next: { revalidate: 3600 } },
+  );
+
   return response;
-}
+});

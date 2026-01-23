@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   NavigationMenu,
@@ -10,6 +10,8 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
   return (
@@ -44,8 +46,39 @@ export default function Navbar() {
           <div className="cursor-pointer rounded-full bg-white/10 p-2 transition hover:bg-white/20">
             <Search className="h-5 w-5 text-white" />
           </div>
+          <div className="md:hidden text-white">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-6 w-6 cursor-pointer" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                side="right"
+                className="bg-black border-white/10 text-white"
+              >
+                <SheetTitle className="text-white mb-6">Menu</SheetTitle>
+                <div className="flex flex-col gap-6 text-lg font-medium mt-8">
+                  <Link href="/" className="hover:text-red-500">
+                    Home
+                  </Link>
+                  <Link href="/genre/action" className="hover:text-red-500">
+                    Action Movies
+                  </Link>
+                  <Link href="/genre/romance" className="hover:text-red-500">
+                    Romance
+                  </Link>
+                  <Link href="/genre/horror" className="hover:text-red-500">
+                    Horror
+                  </Link>
+                  <Link href="/new-releases" className="text-red-500">
+                    New Releases
+                  </Link>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-
       </div>
     </header>
   );
