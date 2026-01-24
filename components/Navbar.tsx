@@ -15,6 +15,8 @@ import {
   SheetContent,
   SheetTitle,
   SheetTrigger,
+  SheetHeader,
+  SheetDescription,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
@@ -57,8 +59,11 @@ export default function Navbar() {
                 side="right"
                 className="bg-black border-white/10 text-white"
               >
-                <SheetTitle className="text-white mb-6">Menu</SheetTitle>
-                <div className="flex flex-col gap-6 text-lg font-medium mt-8">
+                <SheetHeader>
+                  <SheetTitle className="text-white mb-6">Menu</SheetTitle>
+                  <SheetDescription>Curated best <span className="text-red-500">100</span> movies for you</SheetDescription>
+                </SheetHeader>
+                <div className="flex flex-col gap-6 text-lg font-medium mt-8 ml-5">
                   <Link href="/" className="hover:text-red-500">
                     Home
                   </Link>

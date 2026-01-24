@@ -36,4 +36,8 @@ A high-performance, SEO-optimized movie streaming platform architected with **Ne
 
 1. **Clone the repo**
    ```bash
+<<<<<<< HEAD
    git clone [https://github.com/your-username/best100movies.git](https://github.com/your-username/best100movies.git)
+=======
+   git clone [https://github.com/your-username/best100movies.git](https://github.com/your-username/best100movies.git)
+>>>>>>> d5eb1cdf95fdf6895519da4e6e8683d8447e9956
