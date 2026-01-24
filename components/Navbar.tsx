@@ -10,7 +10,12 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
@@ -32,12 +37,7 @@ export default function Navbar() {
             <NavItem href="/genre/action">Action</NavItem>
             <NavItem href="/genre/romance">Romance</NavItem>
             <NavItem href="/genre/horror">Horror</NavItem>
-            <NavItem
-              href="/new-releases"
-              className="text-red-500 hover:text-red-400"
-            >
-              New Releases
-            </NavItem>
+            <NavItem href="/new-releases">New Releases</NavItem>
           </NavigationMenuList>
         </NavigationMenu>
 
@@ -71,7 +71,7 @@ export default function Navbar() {
                   <Link href="/genre/horror" className="hover:text-red-500">
                     Horror
                   </Link>
-                  <Link href="/new-releases" className="text-red-500">
+                  <Link href="/new-releases" className="hover:text-red-500">
                     New Releases
                   </Link>
                 </div>
@@ -85,14 +85,22 @@ export default function Navbar() {
 }
 
 // Helper component to keep code clean
-const NavItem = ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => (
+const NavItem = ({
+  href,
+  children,
+  className,
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+}) => (
   <NavigationMenuItem>
     <Link href={href} legacyBehavior passHref>
-      <NavigationMenuLink 
+      <NavigationMenuLink
         className={cn(
-          navigationMenuTriggerStyle(), 
+          navigationMenuTriggerStyle(),
           "bg-transparent text-gray-300 hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white",
-          className
+          className,
         )}
       >
         {children}

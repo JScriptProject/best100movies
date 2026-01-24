@@ -28,7 +28,7 @@ export default async function Home({ searchParams }: HomeProps) {
             Best <span className="text-red-600">100</span> Movies
           </h1>
           <p className="text-gray-400 max-w-2xl mx-auto text-lg">
-            Curated lists of the absolute best films from TMDB. Updated daily
+            Curated lists of the absolute best films. Updated daily
             for the true cinema lover.
           </p>
           <div className="max-w-md mx-auto mt-6">
