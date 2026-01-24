@@ -124,3 +124,13 @@
   }
 }
 
+.main-page-header{
+  @apply absolute w-screen h-full left-0;
+  background-image:url('/media/back.svg');
+  background-position: top;
+  background-repeat: no-repeat;
+  background-size:contain;
+  background-blend-mode: soft-light;
+  z-index:-1;  
+  
+}
